@@ -1,0 +1,208 @@
+package br.com.projetoacademia.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.SystemColor;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+import br.com.projetoacademia.entidades.Aluno;
+import br.com.projetoacademia.entidades.Pessoa;
+
+public class MenuAluno extends JDialog {
+
+	private final JPanel contentPanel = new JPanel();
+	private JTable table;
+	private JTextField textBusca;
+	private List<Pessoa> pessoas;
+	private DefaultTableModel tableModel;
+	private JButton btnNovo;
+	private JButton btnVisualizar;
+	private JButton btnFechar;
+	private JButton btnBuscar;
+
+	public MenuAluno() {
+		init();
+		setModal(true);
+	}
+
+	private void init() {
+		setIconImage(Toolkit.getDefaultToolkit()
+				.getImage(MenuAluno.class.getResource("/br/com/imagens/adicionar_usuario.png")));
+		setTitle("Cadastro Alunos");
+		setBounds(100, 100, 548, 392);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBackground(Color.WHITE);
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+		setLocationRelativeTo(null);
+		setModal(true);
+
+		JPanel buttonPane = new JPanel();
+		buttonPane.setBorder(new LineBorder(SystemColor.inactiveCaption));
+		buttonPane.setBackground(Color.WHITE);
+		buttonPane.setBounds(0, 314, 532, 32);
+		contentPanel.add(buttonPane);
+		buttonPane.setLayout(null);
+
+		btnNovo = new JButton("Novo");
+		btnNovo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				CadastrarAluno ca = new CadastrarAluno();
+				ca.setVisible(true);
+			}
+		});
+		btnNovo.setBounds(10, 5, 100, 23);
+		btnNovo.setActionCommand("OK");
+		buttonPane.add(btnNovo);
+
+		btnFechar = new JButton("Fechar");
+		btnFechar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				dispose();
+			}
+		});
+		btnFechar.setBounds(420, 5, 100, 23);
+		btnFechar.setActionCommand("OK");
+		buttonPane.add(btnFechar);
+		getRootPane().setDefaultButton(btnFechar);
+
+		btnVisualizar = new JButton("Visualizar");
+		btnVisualizar.setEnabled(false);
+		btnVisualizar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// String login = (String)
+				// table.getValueAt(table.getSelectedRow(), 0);
+				// CadastrarUsuario ca = new
+				// CadastrarUsuario(MenuUsuarios.this.usuarioDao);
+				// ca.setTextLogin(login);
+				// ca.setVisible(true);
+
+				String cpf = (String) table.getValueAt(table.getSelectedRow(), 1);
+				try {
+					// Verificar lógica para buscar pessoa pelo CPF.
+//					Aluno aluno = (Aluno) MenuAluno.this.pessoaDao.buscar(cpf);
+					CadastrarAluno ca = new CadastrarAluno();
+					ca.setPessoa(new Aluno());
+					ca.getBtnSalvar().setEnabled(false);
+					ca.preencherCadastro();
+					ca.bloquearCampos();
+					ca.setarCoresDesativas();
+					ca.getBtnEditar().setEnabled(true);
+					ca.setVisible(true);
+					textBusca.setText("");
+					listarPessoa();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+
+			}
+		});
+		btnVisualizar.setActionCommand("OK");
+		btnVisualizar.setBounds(122, 5, 103, 23);
+		buttonPane.add(btnVisualizar);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 108, 512, 195);
+		contentPanel.add(scrollPane);
+
+		table = new JTable();
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				btnVisualizar.setEnabled(true);
+			}
+		});
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Nome", "CPF"
+			}
+		) {
+			boolean[] columnEditables = new boolean[] {
+				false, false
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
+		table.getColumnModel().getColumn(0).setResizable(false);
+		table.getColumnModel().getColumn(1).setResizable(false);
+		table.getTableHeader().setReorderingAllowed(false);
+		scrollPane.setViewportView(table);
+
+		tableModel = (DefaultTableModel) table.getModel();
+		table.setModel(tableModel);
+		table.getTableHeader().setReorderingAllowed(false);
+
+		JPanel panel = new JPanel();
+		panel.setLayout(null);
+		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Buscar Aluno",
+				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel.setBackground(Color.WHITE);
+		panel.setBounds(10, 14, 512, 83);
+		contentPanel.add(panel);
+
+		JLabel lblUsuario = new JLabel("Aluno:");
+		lblUsuario.setBounds(31, 24, 46, 14);
+		panel.add(lblUsuario);
+
+		textBusca = new JTextField();
+		textBusca.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+				listarPessoa();
+			}
+		});
+		textBusca.setColumns(10);
+		textBusca.setBounds(31, 41, 332, 23);
+		panel.add(textBusca);
+
+		btnBuscar = new JButton("Buscar");
+		btnBuscar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DialogMessage dialogMessage = new DialogMessage();
+				listarPessoa();
+			}
+		});
+		btnBuscar.setBounds(390, 40, 89, 23);
+		panel.add(btnBuscar);
+	}
+
+	private void listarPessoa() {
+		String nome = textBusca.getText();
+//		Verificar logica para buscar pessoa pelo nome.
+//		pessoas = MenuAluno.this.pessoaDao.buscarNome(nome);
+
+		while (tableModel.getRowCount() != 0) {
+			tableModel.removeRow(0);
+		}
+//		for (Pessoa pessoa : pessoas) {
+//			if (pessoa instanceof Aluno) {
+//				tableModel.addRow(new String[] { pessoa.getNome(), pessoa.getCpf() });
+//			}
+//		}
+	}
+
+}

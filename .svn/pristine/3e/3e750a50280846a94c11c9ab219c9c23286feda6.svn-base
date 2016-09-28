@@ -1,0 +1,25 @@
+package br.com.projetoacademia.gui;
+
+import java.awt.EventQueue;
+
+import javax.swing.JDialog;
+import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+
+public class About extends JDialog {
+	public About() {
+		setBounds(100, 100, 484, 344);
+		getContentPane().setLayout(null);
+		
+		JLabel label = new JLabel("New label");
+		label.setIcon(new ImageIcon(About.class.getResource("/br/com/imagens/about.png")));
+		label.setBounds(0, 0, 479, 297);
+		getContentPane().add(label);
+		setResizable(false);
+		setLocationRelativeTo(null);
+		setModal(true);
+
+	}
+}
